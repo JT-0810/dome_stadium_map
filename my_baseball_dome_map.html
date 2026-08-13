@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c8b0e8705b6b9f52a71a11669a82f3ee {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+<div style="
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-family: Arial, sans-serif;
+">
+    <div style="font-size: 20px; font-weight: bold;">
+        🌎 我的世界職棒巨蛋地圖
+    </div>
+    <hr>
+    <div style="font-size: 15px;">🏟️ 球場總數：<span id="stat-total">15</span> 座</div>
+    <div style="font-size: 15px;">🟢 已去過：<span id="stat-visited">0</span> 座</div>
+    <div style="font-size: 15px;">🔵 尚未去過：<span id="stat-unvisited">15</span> 座</div>
+</div>
+    
+<script>
+    const stadiumsData = [{"id": "taipei_dome", "name": "\u53f0\u5317\u5927\u5de8\u86cb (Taipei Dome)", "city": "\u53f0\u5317", "country": "\u53f0\u7063", "team": "\u4e2d\u83ef\u8077\u68d2", "lat": 25.044, "lng": 121.558}, {"id": "tokyo_dome", "name": "\u6771\u4eac\u5de8\u86cb (Tokyo Dome)", "city": "\u6771\u4eac", "country": "\u65e5\u672c", "team": "\u8b80\u8ce3\u5de8\u4eba", "lat": 35.7056, "lng": 139.7519}, {"id": "fukuoka_dome", "name": "\u798f\u5ca1\u5de8\u86cb / MIZUHO PayPay Dome FUKUOKA", "city": "\u798f\u5ca1", "country": "\u65e5\u672c", "team": "\u798f\u5ca1\u8edf\u9280\u9df9", "lat": 33.5953, "lng": 130.3622}, {"id": "kyocera_dome", "name": "\u4eac\u74f7\u5de8\u86cb\u5927\u962a (Kyocera Dome Osaka)", "city": "\u5927\u962a", "country": "\u65e5\u672c", "team": "\u6b50\u529b\u58eb\u731b\u725b", "lat": 34.6693, "lng": 135.4761}, {"id": "vantelin_dome", "name": "\u540d\u53e4\u5c4b\u5de8\u86cb / Vantelin Dome Nagoya", "city": "\u540d\u53e4\u5c4b", "country": "\u65e5\u672c", "team": "\u4e2d\u65e5\u9f8d", "lat": 35.1858, "lng": 136.9475}, {"id": "es_con_field", "name": "ES CON FIELD HOKKAIDO", "city": "\u5317\u5ee3\u5cf6", "country": "\u65e5\u672c", "team": "\u5317\u6d77\u9053\u65e5\u672c\u706b\u817f\u9b25\u58eb", "lat": 42.9908, "lng": 141.554}, {"id": "gocheok_sky_dome", "name": "\u9ad8\u5c3a\u5929\u7a7a\u5de8\u86cb (Gocheok Sky Dome)", "city": "\u9996\u723e", "country": "\u97d3\u570b", "team": "\u57f9\u8b49\u82f1\u96c4", "lat": 37.4982, "lng": 126.8671}, {"id": "tropicana_field", "name": "Tropicana Field", "city": "St. Petersburg", "country": "\u7f8e\u570b", "team": "\u5766\u5e15\u7063\u5149\u8292", "lat": 27.7682, "lng": -82.6534}, {"id": "globe_life_field", "name": "Globe Life Field", "city": "Arlington", "country": "\u7f8e\u570b", "team": "\u5fb7\u5dde\u904a\u9a0e\u5175", "lat": 32.7473, "lng": -97.082}, {"id": "minute_maid_park", "name": "Minute Maid Park", "city": "Houston", "country": "\u7f8e\u570b", "team": "\u4f11\u58eb\u9813\u592a\u7a7a\u4eba", "lat": 29.7573, "lng": -95.3555}, {"id": "t_mobile_park", "name": "T-Mobile Park", "city": "Seattle", "country": "\u7f8e\u570b", "team": "\u897f\u96c5\u5716\u6c34\u624b", "lat": 47.5914, "lng": -122.3324}, {"id": "american_family_field", "name": "American Family Field", "city": "Milwaukee", "country": "\u7f8e\u570b", "team": "\u5bc6\u723e\u74e6\u57fa\u91c0\u9152\u4eba", "lat": 43.0282, "lng": -87.9712}, {"id": "chase_field", "name": "Chase Field", "city": "Phoenix", "country": "\u7f8e\u570b", "team": "\u4e9e\u5229\u6851\u90a3\u97ff\u5c3e\u86c7", "lat": 33.4453, "lng": -112.0669}, {"id": "loandepot_park", "name": "LoanDepot Park", "city": "Miami", "country": "\u7f8e\u570b", "team": "\u9081\u963f\u5bc6\u99ac\u6797\u9b5a", "lat": 25.7781, "lng": -80.2197}, {"id": "rogers_centre", "name": "Rogers Centre", "city": "Toronto", "country": "\u52a0\u62ff\u5927", "team": "\u591a\u502b\u591a\u85cd\u9ce5", "lat": 43.6414, "lng": -79.3894}];
+    const markerVarMap = {"taipei_dome": "marker_3be0440da8293e9720bebb5de0b2723b", "tokyo_dome": "marker_38eaab7482d14e4d53ae71c38dd05841", "fukuoka_dome": "marker_0070b0d98106890489d2a70944458263", "kyocera_dome": "marker_8b21327cb6b9fa911d753b7db5368cd2", "vantelin_dome": "marker_554ad79a0acf1319c0c912468ee5fdc6", "es_con_field": "marker_cc20337bd7d6e4357447dc79d5fe0efb", "gocheok_sky_dome": "marker_d92c1df73b79852b296ec1a91dcad665", "tropicana_field": "marker_e709e6f3c60e1e2ee541792c518af8f3", "globe_life_field": "marker_2e89897509f9cf9dda36c5ef23b43a51", "minute_maid_park": "marker_59790846da1edfbe5b9ed0a5a7aa81a7", "t_mobile_park": "marker_4a2d09190d76f86abf8224cb03feef78", "american_family_field": "marker_272502b8833137e14b8b2ec3badf78a4", "chase_field": "marker_88bc2f1a4b448ce3f38208c25b41214d", "loandepot_park": "marker_7ec81af0a317fb39e99b21fd6d6fc2a8", "rogers_centre": "marker_d7b108b93f67c1966d3b73cbcf4d1617"};
+    let visitedState = JSON.parse(localStorage.getItem('visited_stadiums')) || {};
+
+    // 定義 Leaflet 的綠色與藍色圖示
+    const greenIcon = L.AwesomeMarkers.icon({
+        icon: 'home',
+        markerColor: 'green',
+        prefix: 'glyphicon'
+    });
+
+    const blueIcon = L.AwesomeMarkers.icon({
+        icon: 'home',
+        markerColor: 'blue',
+        prefix: 'glyphicon'
+    });
+
+    // 頁面加載完成後自動綁定 15 個地圖針與統計資料
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            refreshAllMarkers();
+            updateStats();
+        }, 300);
+
+        // 點擊彈窗時同步更新按鈕文字顏色
+        document.addEventListener('click', function (e) {
+            stadiumsData.forEach(stadium => {
+                if (document.getElementById('btn-' + stadium.id)) {
+                    updateButtonUI(stadium.id);
+                }
+            });
+        });
+    });
+
+    function toggleVisited(stadiumId) {
+        // 切換點擊狀態
+        visitedState[stadiumId] = !visitedState[stadiumId];
+        
+        // 儲存至瀏覽器 LocalStorage
+        localStorage.setItem('visited_stadiums', JSON.stringify(visitedState));
+        
+        // 立即改變對應地圖針顏色與介面
+        updateMarkerColor(stadiumId);
+        updateButtonUI(stadiumId);
+        updateStats();
+    }
+
+    function updateMarkerColor(stadiumId) {
+        const varName = markerVarMap[stadiumId];
+        if (varName && window[varName]) {
+            const marker = window[varName];
+            const isVisited = !!visitedState[stadiumId];
+            
+            if (isVisited) {
+                marker.setIcon(greenIcon);
+            } else {
+                marker.setIcon(blueIcon);
+            }
+        }
+    }
+
+    function refreshAllMarkers() {
+        stadiumsData.forEach(stadium => {
+            updateMarkerColor(stadium.id);
+        });
+    }
+
+    function updateButtonUI(stadiumId) {
+        const btn = document.getElementById('btn-' + stadiumId);
+        if (!btn) return;
+
+        const isVisited = !!visitedState[stadiumId];
+        if (isVisited) {
+            btn.innerText = '✓ 已去過 (點擊改為未去過)';
+            btn.style.backgroundColor = '#28a745';
+            btn.style.color = '#ffffff';
+        } else {
+            btn.innerText = '○ 尚未去過 (點擊標記為去過)';
+            btn.style.backgroundColor = '#007bff';
+            btn.style.color = '#ffffff';
+        }
+    }
+
+    function updateStats() {
+        let visitedCount = 0;
+        stadiumsData.forEach(stadium => {
+            if (visitedState[stadium.id]) visitedCount++;
+        });
+
+        const total = stadiumsData.length;
+        document.getElementById('stat-visited').innerText = visitedCount;
+        document.getElementById('stat-unvisited').innerText = total - visitedCount;
+    }
+</script>
+    
+            <div class="folium-map" id="map_c8b0e8705b6b9f52a71a11669a82f3ee" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c8b0e8705b6b9f52a71a11669a82f3ee = L.map(
+                "map_c8b0e8705b6b9f52a71a11669a82f3ee",
+                {
+                    center: [25.0, 0.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 2,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_67fac75f876a4c17cbaf72b2b4868f3c = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_67fac75f876a4c17cbaf72b2b4868f3c.addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var marker_3be0440da8293e9720bebb5de0b2723b = L.marker(
+                [25.044, 121.558],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_8b60374a1f2ecfd4faaaeb1bd0f159c8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_a0dcb1f1229fa6d7841a7f6172e834b6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_74b8fbb7423197c519051893dd5ad9b8 = $(`<div id="html_74b8fbb7423197c519051893dd5ad9b8" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>台北大巨蛋 (Taipei Dome)</h4>         <b>國家：</b>台灣<br>         <b>城市：</b>台北<br>         <b>球隊：</b>中華職棒<br><br>         <button id="btn-taipei_dome"                  onclick="toggleVisited('taipei_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_a0dcb1f1229fa6d7841a7f6172e834b6.setContent(html_74b8fbb7423197c519051893dd5ad9b8);
+            
+        
+
+        marker_3be0440da8293e9720bebb5de0b2723b.bindPopup(popup_a0dcb1f1229fa6d7841a7f6172e834b6)
+        ;
+
+        
+    
+    
+            marker_3be0440da8293e9720bebb5de0b2723b.bindTooltip(
+                `<div>
+                     台北大巨蛋 (Taipei Dome)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_3be0440da8293e9720bebb5de0b2723b.setIcon(icon_8b60374a1f2ecfd4faaaeb1bd0f159c8);
+            
+    
+            var marker_38eaab7482d14e4d53ae71c38dd05841 = L.marker(
+                [35.7056, 139.7519],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_918d457d4c553a5bdfa57f6553fb63e8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c5c93ffcb434b7934b04794d1718a212 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0f701da38a4b5f33647641b0e5e303ca = $(`<div id="html_0f701da38a4b5f33647641b0e5e303ca" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>東京巨蛋 (Tokyo Dome)</h4>         <b>國家：</b>日本<br>         <b>城市：</b>東京<br>         <b>球隊：</b>讀賣巨人<br><br>         <button id="btn-tokyo_dome"                  onclick="toggleVisited('tokyo_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_c5c93ffcb434b7934b04794d1718a212.setContent(html_0f701da38a4b5f33647641b0e5e303ca);
+            
+        
+
+        marker_38eaab7482d14e4d53ae71c38dd05841.bindPopup(popup_c5c93ffcb434b7934b04794d1718a212)
+        ;
+
+        
+    
+    
+            marker_38eaab7482d14e4d53ae71c38dd05841.bindTooltip(
+                `<div>
+                     東京巨蛋 (Tokyo Dome)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_38eaab7482d14e4d53ae71c38dd05841.setIcon(icon_918d457d4c553a5bdfa57f6553fb63e8);
+            
+    
+            var marker_0070b0d98106890489d2a70944458263 = L.marker(
+                [33.5953, 130.3622],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_92ca762751128712680aa1acafcd5e11 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_1b5918460fc303af2b6f5c5b273a51fe = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0883d61878d0c0b697940713b34831e9 = $(`<div id="html_0883d61878d0c0b697940713b34831e9" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>福岡巨蛋 / MIZUHO PayPay Dome FUKUOKA</h4>         <b>國家：</b>日本<br>         <b>城市：</b>福岡<br>         <b>球隊：</b>福岡軟銀鷹<br><br>         <button id="btn-fukuoka_dome"                  onclick="toggleVisited('fukuoka_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_1b5918460fc303af2b6f5c5b273a51fe.setContent(html_0883d61878d0c0b697940713b34831e9);
+            
+        
+
+        marker_0070b0d98106890489d2a70944458263.bindPopup(popup_1b5918460fc303af2b6f5c5b273a51fe)
+        ;
+
+        
+    
+    
+            marker_0070b0d98106890489d2a70944458263.bindTooltip(
+                `<div>
+                     福岡巨蛋 / MIZUHO PayPay Dome FUKUOKA
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_0070b0d98106890489d2a70944458263.setIcon(icon_92ca762751128712680aa1acafcd5e11);
+            
+    
+            var marker_8b21327cb6b9fa911d753b7db5368cd2 = L.marker(
+                [34.6693, 135.4761],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_61c41c7aa9c2a85224c514fc3c042ab0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_02da632db3b59988219706a720378229 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_04e99d278c3c6ef649467ae86effb33f = $(`<div id="html_04e99d278c3c6ef649467ae86effb33f" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>京瓷巨蛋大阪 (Kyocera Dome Osaka)</h4>         <b>國家：</b>日本<br>         <b>城市：</b>大阪<br>         <b>球隊：</b>歐力士猛牛<br><br>         <button id="btn-kyocera_dome"                  onclick="toggleVisited('kyocera_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_02da632db3b59988219706a720378229.setContent(html_04e99d278c3c6ef649467ae86effb33f);
+            
+        
+
+        marker_8b21327cb6b9fa911d753b7db5368cd2.bindPopup(popup_02da632db3b59988219706a720378229)
+        ;
+
+        
+    
+    
+            marker_8b21327cb6b9fa911d753b7db5368cd2.bindTooltip(
+                `<div>
+                     京瓷巨蛋大阪 (Kyocera Dome Osaka)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_8b21327cb6b9fa911d753b7db5368cd2.setIcon(icon_61c41c7aa9c2a85224c514fc3c042ab0);
+            
+    
+            var marker_554ad79a0acf1319c0c912468ee5fdc6 = L.marker(
+                [35.1858, 136.9475],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_814889c424b080d1e2915caff3eb7cc8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ad508dda6f7220c06418327bce006c17 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c9c40c35840d88f19b8a3b3ee3669a58 = $(`<div id="html_c9c40c35840d88f19b8a3b3ee3669a58" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>名古屋巨蛋 / Vantelin Dome Nagoya</h4>         <b>國家：</b>日本<br>         <b>城市：</b>名古屋<br>         <b>球隊：</b>中日龍<br><br>         <button id="btn-vantelin_dome"                  onclick="toggleVisited('vantelin_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_ad508dda6f7220c06418327bce006c17.setContent(html_c9c40c35840d88f19b8a3b3ee3669a58);
+            
+        
+
+        marker_554ad79a0acf1319c0c912468ee5fdc6.bindPopup(popup_ad508dda6f7220c06418327bce006c17)
+        ;
+
+        
+    
+    
+            marker_554ad79a0acf1319c0c912468ee5fdc6.bindTooltip(
+                `<div>
+                     名古屋巨蛋 / Vantelin Dome Nagoya
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_554ad79a0acf1319c0c912468ee5fdc6.setIcon(icon_814889c424b080d1e2915caff3eb7cc8);
+            
+    
+            var marker_cc20337bd7d6e4357447dc79d5fe0efb = L.marker(
+                [42.9908, 141.554],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_32548d1ec6ef07213a44e14499274762 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5aee7a66bfab4a58771c663c1d1349ed = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_076d372718f6f894238c1f804c2fe56d = $(`<div id="html_076d372718f6f894238c1f804c2fe56d" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>ES CON FIELD HOKKAIDO</h4>         <b>國家：</b>日本<br>         <b>城市：</b>北廣島<br>         <b>球隊：</b>北海道日本火腿鬥士<br><br>         <button id="btn-es_con_field"                  onclick="toggleVisited('es_con_field')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_5aee7a66bfab4a58771c663c1d1349ed.setContent(html_076d372718f6f894238c1f804c2fe56d);
+            
+        
+
+        marker_cc20337bd7d6e4357447dc79d5fe0efb.bindPopup(popup_5aee7a66bfab4a58771c663c1d1349ed)
+        ;
+
+        
+    
+    
+            marker_cc20337bd7d6e4357447dc79d5fe0efb.bindTooltip(
+                `<div>
+                     ES CON FIELD HOKKAIDO
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_cc20337bd7d6e4357447dc79d5fe0efb.setIcon(icon_32548d1ec6ef07213a44e14499274762);
+            
+    
+            var marker_d92c1df73b79852b296ec1a91dcad665 = L.marker(
+                [37.4982, 126.8671],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_13d8749455e18db63d8556fa3c0fa3e2 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_1565584ac335182cc7435491c1761e5b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_45f39ced4060cc8406059c593881e81f = $(`<div id="html_45f39ced4060cc8406059c593881e81f" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>高尺天空巨蛋 (Gocheok Sky Dome)</h4>         <b>國家：</b>韓國<br>         <b>城市：</b>首爾<br>         <b>球隊：</b>培證英雄<br><br>         <button id="btn-gocheok_sky_dome"                  onclick="toggleVisited('gocheok_sky_dome')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_1565584ac335182cc7435491c1761e5b.setContent(html_45f39ced4060cc8406059c593881e81f);
+            
+        
+
+        marker_d92c1df73b79852b296ec1a91dcad665.bindPopup(popup_1565584ac335182cc7435491c1761e5b)
+        ;
+
+        
+    
+    
+            marker_d92c1df73b79852b296ec1a91dcad665.bindTooltip(
+                `<div>
+                     高尺天空巨蛋 (Gocheok Sky Dome)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d92c1df73b79852b296ec1a91dcad665.setIcon(icon_13d8749455e18db63d8556fa3c0fa3e2);
+            
+    
+            var marker_e709e6f3c60e1e2ee541792c518af8f3 = L.marker(
+                [27.7682, -82.6534],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_1cffd5c97a734f337d0c2b955ae87e5e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_d58b62e5462a9e26b92b1af05f264457 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_913350703b8f9a85d70eb25f564c0481 = $(`<div id="html_913350703b8f9a85d70eb25f564c0481" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>Tropicana Field</h4>         <b>國家：</b>美國<br>         <b>城市：</b>St. Petersburg<br>         <b>球隊：</b>坦帕灣光芒<br><br>         <button id="btn-tropicana_field"                  onclick="toggleVisited('tropicana_field')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_d58b62e5462a9e26b92b1af05f264457.setContent(html_913350703b8f9a85d70eb25f564c0481);
+            
+        
+
+        marker_e709e6f3c60e1e2ee541792c518af8f3.bindPopup(popup_d58b62e5462a9e26b92b1af05f264457)
+        ;
+
+        
+    
+    
+            marker_e709e6f3c60e1e2ee541792c518af8f3.bindTooltip(
+                `<div>
+                     Tropicana Field
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_e709e6f3c60e1e2ee541792c518af8f3.setIcon(icon_1cffd5c97a734f337d0c2b955ae87e5e);
+            
+    
+            var marker_2e89897509f9cf9dda36c5ef23b43a51 = L.marker(
+                [32.7473, -97.082],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_156226ff750626224e8e5d56a554221c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_6a004ab5491e48907767323571345613 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_41d61b7b95f047dc7b2a609a9a8b96b7 = $(`<div id="html_41d61b7b95f047dc7b2a609a9a8b96b7" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>Globe Life Field</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Arlington<br>         <b>球隊：</b>德州遊騎兵<br><br>         <button id="btn-globe_life_field"                  onclick="toggleVisited('globe_life_field')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_6a004ab5491e48907767323571345613.setContent(html_41d61b7b95f047dc7b2a609a9a8b96b7);
+            
+        
+
+        marker_2e89897509f9cf9dda36c5ef23b43a51.bindPopup(popup_6a004ab5491e48907767323571345613)
+        ;
+
+        
+    
+    
+            marker_2e89897509f9cf9dda36c5ef23b43a51.bindTooltip(
+                `<div>
+                     Globe Life Field
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_2e89897509f9cf9dda36c5ef23b43a51.setIcon(icon_156226ff750626224e8e5d56a554221c);
+            
+    
+            var marker_59790846da1edfbe5b9ed0a5a7aa81a7 = L.marker(
+                [29.7573, -95.3555],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_1cd97b53a18a2811ed891f3744f5e984 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f73c3d95d4cf2cec67cf68c167c090d5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7d3fbe706fedbe437ea4ac0dec31765a = $(`<div id="html_7d3fbe706fedbe437ea4ac0dec31765a" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>Minute Maid Park</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Houston<br>         <b>球隊：</b>休士頓太空人<br><br>         <button id="btn-minute_maid_park"                  onclick="toggleVisited('minute_maid_park')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_f73c3d95d4cf2cec67cf68c167c090d5.setContent(html_7d3fbe706fedbe437ea4ac0dec31765a);
+            
+        
+
+        marker_59790846da1edfbe5b9ed0a5a7aa81a7.bindPopup(popup_f73c3d95d4cf2cec67cf68c167c090d5)
+        ;
+
+        
+    
+    
+            marker_59790846da1edfbe5b9ed0a5a7aa81a7.bindTooltip(
+                `<div>
+                     Minute Maid Park
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_59790846da1edfbe5b9ed0a5a7aa81a7.setIcon(icon_1cd97b53a18a2811ed891f3744f5e984);
+            
+    
+            var marker_4a2d09190d76f86abf8224cb03feef78 = L.marker(
+                [47.5914, -122.3324],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_eaeef5cd8bb6b61d8db2f16a4e5f3083 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ac901caedc8026472732ea3731c60fe1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_470e71f69a74bbe9d3fabe4ae40d6b00 = $(`<div id="html_470e71f69a74bbe9d3fabe4ae40d6b00" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>T-Mobile Park</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Seattle<br>         <b>球隊：</b>西雅圖水手<br><br>         <button id="btn-t_mobile_park"                  onclick="toggleVisited('t_mobile_park')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_ac901caedc8026472732ea3731c60fe1.setContent(html_470e71f69a74bbe9d3fabe4ae40d6b00);
+            
+        
+
+        marker_4a2d09190d76f86abf8224cb03feef78.bindPopup(popup_ac901caedc8026472732ea3731c60fe1)
+        ;
+
+        
+    
+    
+            marker_4a2d09190d76f86abf8224cb03feef78.bindTooltip(
+                `<div>
+                     T-Mobile Park
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_4a2d09190d76f86abf8224cb03feef78.setIcon(icon_eaeef5cd8bb6b61d8db2f16a4e5f3083);
+            
+    
+            var marker_272502b8833137e14b8b2ec3badf78a4 = L.marker(
+                [43.0282, -87.9712],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_3e8f08092b69ced8c673b51c5cc651da = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f24b860be75b600261a94ccd65727aad = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_777be16cadcac174a909c3ce2d7fa5fe = $(`<div id="html_777be16cadcac174a909c3ce2d7fa5fe" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>American Family Field</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Milwaukee<br>         <b>球隊：</b>密爾瓦基釀酒人<br><br>         <button id="btn-american_family_field"                  onclick="toggleVisited('american_family_field')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_f24b860be75b600261a94ccd65727aad.setContent(html_777be16cadcac174a909c3ce2d7fa5fe);
+            
+        
+
+        marker_272502b8833137e14b8b2ec3badf78a4.bindPopup(popup_f24b860be75b600261a94ccd65727aad)
+        ;
+
+        
+    
+    
+            marker_272502b8833137e14b8b2ec3badf78a4.bindTooltip(
+                `<div>
+                     American Family Field
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_272502b8833137e14b8b2ec3badf78a4.setIcon(icon_3e8f08092b69ced8c673b51c5cc651da);
+            
+    
+            var marker_88bc2f1a4b448ce3f38208c25b41214d = L.marker(
+                [33.4453, -112.0669],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_bf63bec09db2c016d6f6553a953872df = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_937eea7f6e222d74599a809ce6ad5e44 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5d266100b3018b2000849ebc40626b68 = $(`<div id="html_5d266100b3018b2000849ebc40626b68" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>Chase Field</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Phoenix<br>         <b>球隊：</b>亞利桑那響尾蛇<br><br>         <button id="btn-chase_field"                  onclick="toggleVisited('chase_field')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_937eea7f6e222d74599a809ce6ad5e44.setContent(html_5d266100b3018b2000849ebc40626b68);
+            
+        
+
+        marker_88bc2f1a4b448ce3f38208c25b41214d.bindPopup(popup_937eea7f6e222d74599a809ce6ad5e44)
+        ;
+
+        
+    
+    
+            marker_88bc2f1a4b448ce3f38208c25b41214d.bindTooltip(
+                `<div>
+                     Chase Field
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_88bc2f1a4b448ce3f38208c25b41214d.setIcon(icon_bf63bec09db2c016d6f6553a953872df);
+            
+    
+            var marker_7ec81af0a317fb39e99b21fd6d6fc2a8 = L.marker(
+                [25.7781, -80.2197],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_1f0c8cad0b1bff888efeb00a8943980a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_390e395b6f29a0554272dad8536b1cb0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_01fc662ea764933065993e63e1ee36ee = $(`<div id="html_01fc662ea764933065993e63e1ee36ee" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>LoanDepot Park</h4>         <b>國家：</b>美國<br>         <b>城市：</b>Miami<br>         <b>球隊：</b>邁阿密馬林魚<br><br>         <button id="btn-loandepot_park"                  onclick="toggleVisited('loandepot_park')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_390e395b6f29a0554272dad8536b1cb0.setContent(html_01fc662ea764933065993e63e1ee36ee);
+            
+        
+
+        marker_7ec81af0a317fb39e99b21fd6d6fc2a8.bindPopup(popup_390e395b6f29a0554272dad8536b1cb0)
+        ;
+
+        
+    
+    
+            marker_7ec81af0a317fb39e99b21fd6d6fc2a8.bindTooltip(
+                `<div>
+                     LoanDepot Park
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_7ec81af0a317fb39e99b21fd6d6fc2a8.setIcon(icon_1f0c8cad0b1bff888efeb00a8943980a);
+            
+    
+            var marker_d7b108b93f67c1966d3b73cbcf4d1617 = L.marker(
+                [43.6414, -79.3894],
+                {
+}
+            ).addTo(map_c8b0e8705b6b9f52a71a11669a82f3ee);
+        
+    
+            var icon_fa6ab2fe4d143ab7d1fb45ed2a4aed39 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b2e9d6626340438fcdcac8954de1e727 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0e78faf81ad6e87a16c56a2c48ecdb52 = $(`<div id="html_0e78faf81ad6e87a16c56a2c48ecdb52" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial; width: 220px;">         <h4>Rogers Centre</h4>         <b>國家：</b>加拿大<br>         <b>城市：</b>Toronto<br>         <b>球隊：</b>多倫多藍鳥<br><br>         <button id="btn-rogers_centre"                  onclick="toggleVisited('rogers_centre')"                  style="padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">             載入中...         </button>     </div>     </div>`)[0];
+                popup_b2e9d6626340438fcdcac8954de1e727.setContent(html_0e78faf81ad6e87a16c56a2c48ecdb52);
+            
+        
+
+        marker_d7b108b93f67c1966d3b73cbcf4d1617.bindPopup(popup_b2e9d6626340438fcdcac8954de1e727)
+        ;
+
+        
+    
+    
+            marker_d7b108b93f67c1966d3b73cbcf4d1617.bindTooltip(
+                `<div>
+                     Rogers Centre
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d7b108b93f67c1966d3b73cbcf4d1617.setIcon(icon_fa6ab2fe4d143ab7d1fb45ed2a4aed39);
+            
+</script>
+</html>
