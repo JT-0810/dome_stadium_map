@@ -107,12 +107,11 @@
     });
 
     // 設定 TileLayer (關閉相機失真，並加入防框線邏輯)
-    const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        tileSize: 256,
-        zoomOffset: 0,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+// 替換這段 L.tileLayer：
+const tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+}).addTo(map);
 
     // 狀態持久化 (localStorage)
     let visitedState = JSON.parse(localStorage.getItem('visited_stadiums')) || {};
