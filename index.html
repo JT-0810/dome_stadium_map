@@ -92,16 +92,28 @@
         {"id": "rogers_centre", "name": "Rogers Centre", "city": "Toronto", "country": "加拿大", "team": "多倫多藍鳥", "lat": 43.6414, "lng": -79.3894}
     ];
 
-    // 初始化地圖
+    // 🎯 關鍵修正：限制地圖邊界，不讓地圖無限複製橫向滾動
+    const southWest = L.latLng(-89.9, -180);
+    const northEast = L.latLng(89.9, 180);
+    const bounds = L.latLngBounds(southWest, northEast);
+
+    // 初始化地圖 (限制 minZoom、maxBounds 與 noWrap)
     const map = L.map('map', {
-        center: [25.0, 10.0],
+        center: [20.0, 10.0],
         zoom: 2.5,
+        minZoom: 2,                     // 限制最小縮放，避免過度拉小出現空白
+        maxBounds: bounds,             // 鎖定只能在單一世界範圍內移動
+        maxBoundsViscosity: 1.0,       // 邊界黏性，不讓畫面彈出世界邊界
+        worldCopyJump: false,
         zoomAnimation: true
     });
 
-    // 🎯 更換為 CARTO Positron 極簡底圖（乾淨無雜線）
+    // 🎯 加入 noWrap: true 參數，防止圖磚重複貼附
     const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
+        minZoom: 2,
+        noWrap: true,                  // 關鍵設定：停止橫向平鋪圖磚
+        bounds: bounds,
         subdomains: 'abcd',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
