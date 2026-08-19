@@ -41,16 +41,16 @@
             image-rendering: crisp-edges;
         }
 
-        /* 左下角統計看板 */
+        /* 左下角微型統計看板 */
         .stats-panel {
             position: fixed;
-            bottom: 15px;
-            left: 15px;
+            bottom: 10px;
+            left: 10px;
             z-index: 9999;
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 10px 14px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             backdrop-filter: blur(4px);
         }
@@ -58,31 +58,32 @@
 </head>
 <body>
 
-    <!-- 左上角統計看板 -->
+    <!-- 統計看板 -->
     <div class="stats-panel">
-        <div style="font-size: 18px; font-weight: bold; color: #333;">
+        <div style="font-size: 14px; font-weight: bold; color: #333;">
             🌎 我的世界職棒巨蛋地圖
         </div>
-        <hr style="margin: 8px 0; border-color: #eee;">
-        <div style="font-size: 14px; color: #555;">🏟️ 球場總數：<span id="stat-total" style="font-weight: bold;">15</span> 座</div>
-        <div style="font-size: 14px; color: #28a745;">🟢 已去過：<span id="stat-visited" style="font-weight: bold;">0</span> 座</div>
-        <div style="font-size: 14px; color: #007bff;">🔵 尚未去過：<span id="stat-unvisited" style="font-weight: bold;">15</span> 座</div>
+        <hr style="margin: 5px 0; border-color: #eee;">
+        <div style="font-size: 12px; color: #555; line-height: 1.5;">🏟️ 球場總數：<span id="stat-total" style="font-weight: bold;">16</span> 座</div>
+        <div style="font-size: 12px; color: #28a745; line-height: 1.5;">🟢 已去過：<span id="stat-visited" style="font-weight: bold;">0</span> 座</div>
+        <div style="font-size: 12px; color: #007bff; line-height: 1.5;">🔵 尚未去過：<span id="stat-unvisited" style="font-weight: bold;">16</span> 座</div>
     </div>
 
     <!-- 地圖容器 -->
     <div id="map"></div>
 
 <script>
-    // 15 座職棒巨蛋完整資料集
+    // 16 座職棒巨蛋完整資料集 (包含 Belluna Dome)
     const stadiumsData = [
-        {"id": "taipei_dome", "name": "台北大巨蛋 (Taipei Dome)", "city": "台北", "country": "台灣", "team": "中華職棒", "lat": 25.042327, "lng": 121.5601},
+        {"id": "taipei_dome", "name": "台北大巨蛋 (Taipei Dome)", "city": "台北", "country": "台灣", "team": "中華職棒", "lat": 25.044, "lng": 121.558},
         {"id": "tokyo_dome", "name": "東京巨蛋 (Tokyo Dome)", "city": "東京", "country": "日本", "team": "讀賣巨人", "lat": 35.7056, "lng": 139.7519},
-        {"id": "fukuoka_dome", "name": "福岡巨蛋 / MIZUHO PayPay Dome", "city": "福岡", "country": "日本", "team": "福岡軟銀鷹", "lat": 33.5953, "lng": 130.3621},
+        {"id": "belluna_dome", "name": "西武巨蛋 (Belluna Dome)", "city": "埼玉", "country": "日本", "team": "埼玉西武獅", "lat": 35.7686, "lng": 139.4206},
+        {"id": "fukuoka_dome", "name": "福岡巨蛋 / MIZUHO PayPay Dome", "city": "福岡", "country": "日本", "team": "福岡軟銀鷹", "lat": 33.5953, "lng": 130.3622},
         {"id": "kyocera_dome", "name": "京瓷巨蛋大阪 (Kyocera Dome Osaka)", "city": "大阪", "country": "日本", "team": "歐力士猛牛", "lat": 34.6693, "lng": 135.4761},
-        {"id": "vantelin_dome", "name": "名古屋巨蛋 / Vantelin Dome Nagoya", "city": "名古屋", "country": "日本", "team": "中日龍", "lat": 35.1859, "lng": 136.9473},
-        {"id": "es_con_field", "name": "ES CON FIELD HOKKAIDO", "city": "北廣島", "country": "日本", "team": "北海道日本火腿鬥士", "lat": 42.9897, "lng": 141.5494},
-        {"id": "gocheok_sky_dome", "name": "高尺天空巨蛋 (Gocheok Sky Dome)", "city": "首爾", "country": "韓國", "team": "培證英雄", "lat": 37.498222, "lng": 126.867250},
-        {"id": "tropicana_field", "name": "Tropicana Field", "city": "St. Petersburg", "country": "美國", "team": "坦帕灣光芒", "lat": 27.7683, "lng": -82.6534},
+        {"id": "vantelin_dome", "name": "名古屋巨蛋 / Vantelin Dome Nagoya", "city": "名古屋", "country": "日本", "team": "中日龍", "lat": 35.1858, "lng": 136.9475},
+        {"id": "es_con_field", "name": "ES CON FIELD HOKKAIDO", "city": "北廣島", "country": "日本", "team": "北海道日本火腿鬥士", "lat": 42.9908, "lng": 141.554},
+        {"id": "gocheok_sky_dome", "name": "高尺天空巨蛋 (Gocheok Sky Dome)", "city": "首爾", "country": "韓國", "team": "培證英雄", "lat": 37.4982, "lng": 126.8671},
+        {"id": "tropicana_field", "name": "Tropicana Field", "city": "St. Petersburg", "country": "美國", "team": "坦帕灣光芒", "lat": 27.7682, "lng": -82.6534},
         {"id": "globe_life_field", "name": "Globe Life Field", "city": "Arlington", "country": "美國", "team": "德州遊騎兵", "lat": 32.7473, "lng": -97.082},
         {"id": "minute_maid_park", "name": "Minute Maid Park", "city": "Houston", "country": "美國", "team": "休士頓太空人", "lat": 29.7573, "lng": -95.3555},
         {"id": "t_mobile_park", "name": "T-Mobile Park", "city": "Seattle", "country": "美國", "team": "西雅圖水手", "lat": 47.5914, "lng": -122.3324},
@@ -92,27 +93,27 @@
         {"id": "rogers_centre", "name": "Rogers Centre", "city": "Toronto", "country": "加拿大", "team": "多倫多藍鳥", "lat": 43.6414, "lng": -79.3894}
     ];
 
-    // 🎯 關鍵修正：限制地圖邊界，不讓地圖無限複製橫向滾動
+    // 限制地圖邊界
     const southWest = L.latLng(-89.9, -180);
     const northEast = L.latLng(89.9, 180);
     const bounds = L.latLngBounds(southWest, northEast);
 
-    // 初始化地圖 (限制 minZoom、maxBounds 與 noWrap)
+    // 初始化地圖
     const map = L.map('map', {
         center: [20.0, 10.0],
         zoom: 2.5,
-        minZoom: 2,                     // 限制最小縮放，避免過度拉小出現空白
-        maxBounds: bounds,             // 鎖定只能在單一世界範圍內移動
-        maxBoundsViscosity: 1.0,       // 邊界黏性，不讓畫面彈出世界邊界
+        minZoom: 2,
+        maxBounds: bounds,
+        maxBoundsViscosity: 1.0,
         worldCopyJump: false,
         zoomAnimation: true
     });
 
-    // 🎯 加入 noWrap: true 參數，防止圖磚重複貼附
+    // CARTO Positron 底圖
     const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         minZoom: 2,
-        noWrap: true,                  // 關鍵設定：停止橫向平鋪圖磚
+        noWrap: true,
         bounds: bounds,
         subdomains: 'abcd',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -180,7 +181,7 @@
         btn.style.backgroundColor = isVisited ? '#28a745' : '#007bff';
     }
 
-    // 更新頂部數據看板
+    // 更新數據看板
     function updateStats() {
         let visitedCount = 0;
         stadiumsData.forEach(stadium => {
