@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="referrer" content="no-referrer" />
     <title>我的世界職棒巨蛋地圖</title>
 
     <!-- Leaflet & Bootstrap CSS / JS -->
@@ -84,10 +85,9 @@
     <div id="map"></div>
 
 <script>
-    // 預設備用圖片 (圖案)
     const fallbackImg = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80";
 
-    // 15 座職棒巨蛋完整資料集 (替換為穩定高可用圖源)
+    // 15 座職棒巨蛋專屬真實照片
     const stadiumsData = [
         {"id": "taipei_dome", "name": "台北大巨蛋 (Taipei Dome)", "city": "台北", "country": "台灣", "team": "中華職棒", "lat": 25.044, "lng": 121.558, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Taipei_Dome_20231123.jpg/640px-Taipei_Dome_20231123.jpg"},
         {"id": "tokyo_dome", "name": "東京巨蛋 (Tokyo Dome)", "city": "東京", "country": "日本", "team": "讀賣巨人", "lat": 35.7056, "lng": 139.7519, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Tokyo_Dome_2022.jpg/640px-Tokyo_Dome_2022.jpg"},
@@ -138,6 +138,7 @@
                 <img src="${stadium.image}" 
                      alt="${stadium.name}" 
                      class="stadium-popup-img"
+                     referrerpolicy="no-referrer"
                      onerror="this.onerror=null; this.src='${fallbackImg}';">
                 <h4 style="margin-top: 0; font-size: 16px; font-weight: bold;">${stadium.name}</h4>
                 <b>國家：</b>${stadium.country}<br>
