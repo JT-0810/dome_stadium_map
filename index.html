@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="referrer" content="no-referrer" />
     <title>我的世界職棒巨蛋地圖</title>
 
     <!-- Leaflet & Bootstrap CSS / JS -->
@@ -34,10 +33,10 @@
             left: 0;
         }
         
+        /* 防鋸齒與拼接縫隙 CSS 修正 */
         .leaflet-tile-container img.leaflet-tile {
             transform: scale(1.005) translateZ(0);
             outline: 1px solid transparent;
-            mix-blend-mode: multiply;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
@@ -54,17 +53,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             backdrop-filter: blur(4px);
-        }
-
-        /* Popup 內的圖片樣式優化 */
-        .stadium-popup-img {
-            width: 100%;
-            height: 130px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            background-color: #e9ecef;
-            display: block;
         }
     </style>
 </head>
@@ -85,25 +73,23 @@
     <div id="map"></div>
 
 <script>
-    const fallbackImg = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80";
-
-    // 15 座職棒巨蛋專屬真實照片
+    // 15 座職棒巨蛋完整資料集
     const stadiumsData = [
-        {"id": "taipei_dome", "name": "台北大巨蛋 (Taipei Dome)", "city": "台北", "country": "台灣", "team": "中華職棒", "lat": 25.044, "lng": 121.558, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Taipei_Dome_20231123.jpg/640px-Taipei_Dome_20231123.jpg"},
-        {"id": "tokyo_dome", "name": "東京巨蛋 (Tokyo Dome)", "city": "東京", "country": "日本", "team": "讀賣巨人", "lat": 35.7056, "lng": 139.7519, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Tokyo_Dome_2022.jpg/640px-Tokyo_Dome_2022.jpg"},
-        {"id": "fukuoka_dome", "name": "福岡巨蛋 / MIZUHO PayPay Dome", "city": "福岡", "country": "日本", "team": "福岡軟銀鷹", "lat": 33.5953, "lng": 130.3622, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Fukuoka_PayPay_Dome_2020.jpg/640px-Fukuoka_PayPay_Dome_2020.jpg"},
-        {"id": "kyocera_dome", "name": "京瓷巨蛋大阪 (Kyocera Dome Osaka)", "city": "大阪", "country": "日本", "team": "歐力士猛牛", "lat": 34.6693, "lng": 135.4761, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Osaka_Dome_01.jpg/640px-Osaka_Dome_01.jpg"},
-        {"id": "vantelin_dome", "name": "名古屋巨蛋 / Vantelin Dome Nagoya", "city": "名古屋", "country": "日本", "team": "中日龍", "lat": 35.1858, "lng": 136.9475, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Nagoya_Dome_2021.jpg/640px-Nagoya_Dome_2021.jpg"},
-        {"id": "es_con_field", "name": "ES CON FIELD HOKKAIDO", "city": "北廣島", "country": "日本", "team": "北海道日本火腿鬥士", "lat": 42.9908, "lng": 141.554, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Es_Con_Field_Hokkaido_20230325.jpg/640px-Es_Con_Field_Hokkaido_20230325.jpg"},
-        {"id": "gocheok_sky_dome", "name": "高尺天空巨蛋 (Gocheok Sky Dome)", "city": "首爾", "country": "韓國", "team": "培證英雄", "lat": 37.4982, "lng": 126.8671, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Gocheok_Sky_Dome_2016.jpg/640px-Gocheok_Sky_Dome_2016.jpg"},
-        {"id": "tropicana_field", "name": "Tropicana Field", "city": "St. Petersburg", "country": "美國", "team": "坦帕灣光芒", "lat": 27.7682, "lng": -82.6534, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Tropicana_Field_exterior_2018.jpg/640px-Tropicana_Field_exterior_2018.jpg"},
-        {"id": "globe_life_field", "name": "Globe Life Field", "city": "Arlington", "country": "美國", "team": "德州遊騎兵", "lat": 32.7473, "lng": -97.082, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Globe_Life_Field_2021.jpg/640px-Globe_Life_Field_2021.jpg"},
-        {"id": "minute_maid_park", "name": "Minute Maid Park", "city": "Houston", "country": "美國", "team": "休士頓太空人", "lat": 29.7573, "lng": -95.3555, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Minute_Maid_Park_2022.jpg/640px-Minute_Maid_Park_2022.jpg"},
-        {"id": "t_mobile_park", "name": "T-Mobile Park", "city": "Seattle", "country": "美國", "team": "西雅圖水手", "lat": 47.5914, "lng": -122.3324, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/T-Mobile_Park_2021.jpg/640px-T-Mobile_Park_2021.jpg"},
-        {"id": "american_family_field", "name": "American Family Field", "city": "Milwaukee", "country": "美國", "team": "密爾瓦基釀酒人", "lat": 43.0282, "lng": -87.9712, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/American_Family_Field_2021.jpg/640px-American_Family_Field_2021.jpg"},
-        {"id": "chase_field", "name": "Chase Field", "city": "Phoenix", "country": "美國", "team": "亞利桑那響尾蛇", "lat": 33.4453, "lng": -112.0669, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Chase_Field_2019.jpg/640px-Chase_Field_2019.jpg"},
-        {"id": "loandepot_park", "name": "LoanDepot Park", "city": "Miami", "country": "美國", "team": "邁阿密馬林魚", "lat": 25.7781, "lng": -80.2197, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Marlins_Park_2018.jpg/640px-Marlins_Park_2018.jpg"},
-        {"id": "rogers_centre", "name": "Rogers Centre", "city": "Toronto", "country": "加拿大", "team": "多倫多藍鳥", "lat": 43.6414, "lng": -79.3894, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Rogers_Centre_2022.jpg/640px-Rogers_Centre_2022.jpg"}
+        {"id": "taipei_dome", "name": "台北大巨蛋 (Taipei Dome)", "city": "台北", "country": "台灣", "team": "中華職棒", "lat": 25.044, "lng": 121.558},
+        {"id": "tokyo_dome", "name": "東京巨蛋 (Tokyo Dome)", "city": "東京", "country": "日本", "team": "讀賣巨人", "lat": 35.7056, "lng": 139.7519},
+        {"id": "fukuoka_dome", "name": "福岡巨蛋 / MIZUHO PayPay Dome", "city": "福岡", "country": "日本", "team": "福岡軟銀鷹", "lat": 33.5953, "lng": 130.3622},
+        {"id": "kyocera_dome", "name": "京瓷巨蛋大阪 (Kyocera Dome Osaka)", "city": "大阪", "country": "日本", "team": "歐力士猛牛", "lat": 34.6693, "lng": 135.4761},
+        {"id": "vantelin_dome", "name": "名古屋巨蛋 / Vantelin Dome Nagoya", "city": "名古屋", "country": "日本", "team": "中日龍", "lat": 35.1858, "lng": 136.9475},
+        {"id": "es_con_field", "name": "ES CON FIELD HOKKAIDO", "city": "北廣島", "country": "日本", "team": "北海道日本火腿鬥士", "lat": 42.9908, "lng": 141.554},
+        {"id": "gocheok_sky_dome", "name": "高尺天空巨蛋 (Gocheok Sky Dome)", "city": "首爾", "country": "韓國", "team": "培證英雄", "lat": 37.4982, "lng": 126.8671},
+        {"id": "tropicana_field", "name": "Tropicana Field", "city": "St. Petersburg", "country": "美國", "team": "坦帕灣光芒", "lat": 27.7682, "lng": -82.6534},
+        {"id": "globe_life_field", "name": "Globe Life Field", "city": "Arlington", "country": "美國", "team": "德州遊騎兵", "lat": 32.7473, "lng": -97.082},
+        {"id": "minute_maid_park", "name": "Minute Maid Park", "city": "Houston", "country": "美國", "team": "休士頓太空人", "lat": 29.7573, "lng": -95.3555},
+        {"id": "t_mobile_park", "name": "T-Mobile Park", "city": "Seattle", "country": "美國", "team": "西雅圖水手", "lat": 47.5914, "lng": -122.3324},
+        {"id": "american_family_field", "name": "American Family Field", "city": "Milwaukee", "country": "美國", "team": "密爾瓦基釀酒人", "lat": 43.0282, "lng": -87.9712},
+        {"id": "chase_field", "name": "Chase Field", "city": "Phoenix", "country": "美國", "team": "亞利桑那響尾蛇", "lat": 33.4453, "lng": -112.0669},
+        {"id": "loandepot_park", "name": "LoanDepot Park", "city": "Miami", "country": "美國", "team": "邁阿密馬林魚", "lat": 25.7781, "lng": -80.2197},
+        {"id": "rogers_centre", "name": "Rogers Centre", "city": "Toronto", "country": "加拿大", "team": "多倫多藍鳥", "lat": 43.6414, "lng": -79.3894}
     ];
 
     // 初始化地圖
@@ -113,9 +99,11 @@
         zoomAnimation: true
     });
 
-    const tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    // 🎯 更換為 CARTO Positron 極簡底圖（乾淨無雜線）
+    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
 
     // 狀態持久化 (localStorage)
@@ -135,11 +123,6 @@
 
         const popupContent = `
             <div style="font-family: Arial; width: 220px;">
-                <img src="${stadium.image}" 
-                     alt="${stadium.name}" 
-                     class="stadium-popup-img"
-                     referrerpolicy="no-referrer"
-                     onerror="this.onerror=null; this.src='${fallbackImg}';">
                 <h4 style="margin-top: 0; font-size: 16px; font-weight: bold;">${stadium.name}</h4>
                 <b>國家：</b>${stadium.country}<br>
                 <b>城市：</b>${stadium.city}<br>
